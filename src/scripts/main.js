@@ -17,9 +17,24 @@ const blockSize = 10;
 let widthInBlocks = width / blockSize;
 let heightInBlocks = height / blockSize;
 
+//рисуем MENU
+let menu = () =>{
+    ctx.clearRect(0,0,width,height);
+    ctx.fillStyle = "Black";
+    ctx.fillRect(0,0,width,height);
 
+    ctx.font = "30px serif";
+    ctx.fillStyle = "White";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+
+    ctx.fillText("Start game", width / 2, height / 2);
+    ctx.font = "15px serif";
+    ctx.fillText("press space", width / 2, height / 2 + 20);
+}
 //рисуем рамку
-let drawBorder = function(){
+let drawBorder = () =>{
     ctx.fillStyle = "Gray";
     ctx.fillRect(0,0,width,blockSize);//верх
     ctx.fillRect(0,height - blockSize,width,blockSize);//низ
@@ -27,7 +42,7 @@ let drawBorder = function(){
     ctx.fillRect(width - blockSize,0,blockSize, height);//право
 };
 //Выводим счет
-let drawScore = function (){
+let drawScore = () => {
     ctx.font = "20px Courier";
     ctx.fillStyle = "Black";
     ctx.textAlign = "left";
@@ -35,7 +50,7 @@ let drawScore = function (){
     ctx.fillText("Счет: "+ score,blockSize,blockSize);
 };
 // Конец игры
-let gameOver = ()=>{
+let gameOver = () => {
     //clearInterval(intervalId);//остановка счетчика для setInterval
 
     clearTimeout(timeoutId);
@@ -200,6 +215,8 @@ class Apple {
     };
 };
 
+
+//создание объектов
 let snake = new Snake();
 let apple = new Apple();
 
@@ -215,7 +232,10 @@ let direction = {
 
      if (newDirection !== undefined){
          snake.setDirection(newDirection);
-     }
+     };
+     if(event.keyCode === 32){
+        startDrawGame();
+    }
 });
 
 
@@ -232,18 +252,26 @@ let direction = {
 let animationTime = 100;
 let levelOfComplexity = score * 2;
 
-let timeoutId = setTimeout(function gameLoop(){ // Функция будет жить в памяти, пока не сработал (или не был очищен) таймер
-    ctx.clearRect(0,0,width,height);
-    drawScore();
-    snake.move();
-    snake.draw();
-    apple.draw();
-    drawBorder();
-    if (checkCollisionIndicator){ //проверяем для того, чтобы рекурсия НЕ вызывалась вечно
-    //потому что без нее после столкновения можно продолжить играть т к рекурсия не останавливается
-        setTimeout(gameLoop,animationTime-levelOfComplexity);
-    }else{
-        gameOver();
-    }
-    
-},100);
+function startDrawGame (){
+
+    // timeoutId локальная переменная
+
+
+    let timeoutId = setTimeout(function gameLoop(){ // Функция будет жить в памяти, пока не сработал (или не был очищен) таймер
+        ctx.clearRect(0,0,width,height);
+        drawScore();
+        snake.move();
+        snake.draw();
+        apple.draw();
+        drawBorder();
+        if (checkCollisionIndicator){ //проверяем для того, чтобы рекурсия НЕ вызывалась вечно
+        //потому что без нее после столкновения можно продолжить играть т к рекурсия не останавливается
+            setTimeout(gameLoop,animationTime-levelOfComplexity);
+        }else{
+            gameOver();
+        }
+        
+    },100);    
+};
+
+menu();
