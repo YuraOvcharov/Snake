@@ -5,6 +5,8 @@ let ctx = canvas.getContext("2d");
 const width = 500;//canvas.width;
 const height =500;//canvas.height;
 let score = 0;
+let checkCollisionIndicator = true; // для того, чтобы при рекурсивном вызове
+//setTimeout выйти.
 
 
 canvas.width = width;
@@ -34,9 +36,9 @@ let drawScore = function (){
 };
 // Конец игры
 let gameOver = ()=>{
-    //clearInterval(intervalId);//остановка счетчика
-    let handle;
-    clearTimeout(handle);
+    //clearInterval(intervalId);//остановка счетчика для setInterval
+
+    clearTimeout(timeoutId);
     ctx.font = "30px Courier";
     ctx.fillStyle = "Black";
     ctx.textAlign = "center";
@@ -126,7 +128,7 @@ class Snake{
         };
 
         if (this.checkCollision(newHead)){
-            gameOver();
+            checkCollisionIndicator = false;
             return;
         };
 
@@ -229,14 +231,19 @@ let direction = {
 
 let animationTime = 100;
 let levelOfComplexity = score * 2;
-let gameLoop = () => {
+
+let timeoutId = setTimeout(function gameLoop(){ // Функция будет жить в памяти, пока не сработал (или не был очищен) таймер
     ctx.clearRect(0,0,width,height);
     drawScore();
     snake.move();
     snake.draw();
     apple.draw();
     drawBorder();
-    setTimeout(gameLoop,animationTime-levelOfComplexity);
-};
-
-gameLoop();
+    if (checkCollisionIndicator){ //проверяем для того, чтобы рекурсия НЕ вызывалась вечно
+    //потому что без нее после столкновения можно продолжить играть т к рекурсия не останавливается
+        setTimeout(gameLoop,animationTime-levelOfComplexity);
+    }else{
+        gameOver();
+    }
+    
+},100);
