@@ -5,8 +5,9 @@ let ctx = canvas.getContext("2d");
 const width = 500;//canvas.width;
 const height =500;//canvas.height;
 let score = 0;
-let checkCollisionIndicator = true; // для того, чтобы при рекурсивном вызове
-//setTimeout выйти.
+let checkCollisionIndicator = false; // для того, чтобы при рекурсивном вызове setTimeout выйти.(столкнулся ли со стено?)
+let startGameIndicator = false; // для возможности делать паузу (запущена игра?)
+
 
 
 canvas.width = width;
@@ -50,10 +51,10 @@ let drawScore = () => {
     ctx.fillText("Счет: "+ score,blockSize,blockSize);
 };
 // Конец игры
-let gameOver = () => {
+let gameOver = (timeoutId) => {
     //clearInterval(intervalId);//остановка счетчика для setInterval
 
-    clearTimeout(timeoutId);
+//    clearTimeout(timeoutId);
     ctx.font = "30px Courier";
     ctx.fillStyle = "Black";
     ctx.textAlign = "center";
@@ -98,7 +99,6 @@ class Block{
         return this.col === otherBlock.col && this.row === otherBlock.row;
     };
 }
-
 //задаем змею
 class Snake{
     constructor(){
@@ -143,7 +143,7 @@ class Snake{
         };
 
         if (this.checkCollision(newHead)){
-            checkCollisionIndicator = false;
+            checkCollisionIndicator = true;
             return;
         };
 
@@ -188,7 +188,6 @@ class Snake{
         this.nextDirection = newDirection;
     };
 };
-
 class Apple {
     constructor(){
         this.position = new Block(widthInBlocks / 2,heightInBlocks / 2);
@@ -215,10 +214,10 @@ class Apple {
     };
 };
 
-
 //создание объектов
 let snake = new Snake();
 let apple = new Apple();
+
 
 let direction = {
      37: "left",
@@ -228,35 +227,25 @@ let direction = {
  }
 
  $("body").keydown(function(event){
-     let newDirection = direction[event.keyCode];
-
-     if (newDirection !== undefined){
-         snake.setDirection(newDirection);
-     };
-     if(event.keyCode === 32){
-        startDrawGame();
-    }
+    let newDirection = direction[event.keyCode];
+    if (newDirection !== undefined){
+        snake.setDirection(newDirection);
+    };
+    if(event.keyCode === 32){ //code enter 32code "space"
+        if (startGameIndicator === false){
+            startGameIndicator = true;
+            startGameDraw();
+        }else{
+            startGameIndicator = false;
+        };
+    };
 });
 
 
-// let intervalId = setInterval(function(){
-//     ctx.clearRect(0,0,width,height);
-//     drawScore();
-//     snake.move();
-//     snake.draw();
-//     apple.draw();
-//     drawBorder();
-// },100);
-
-
 let animationTime = 100;
-let levelOfComplexity = score * 2;
+let levelOfComplexity = score * 2; //для увеличения скорости
 
-function startDrawGame (){
-
-    // timeoutId локальная переменная
-
-
+function startGameDraw (){
     let timeoutId = setTimeout(function gameLoop(){ // Функция будет жить в памяти, пока не сработал (или не был очищен) таймер
         ctx.clearRect(0,0,width,height);
         drawScore();
@@ -264,14 +253,36 @@ function startDrawGame (){
         snake.draw();
         apple.draw();
         drawBorder();
-        if (checkCollisionIndicator){ //проверяем для того, чтобы рекурсия НЕ вызывалась вечно
+
+        if ((checkCollisionIndicator === false) && (startGameIndicator === true)){ //проверяем для того, чтобы рекурсия НЕ вызывалась вечно
         //потому что без нее после столкновения можно продолжить играть т к рекурсия не останавливается
             setTimeout(gameLoop,animationTime-levelOfComplexity);
-        }else{
-            gameOver();
-        }
-        
-    },100);    
+        }else if (checkCollisionIndicator === true){
+            gameOver(timeoutId);
+            setTimeout(function(){
+                ctx.clearRect(0,0,width,height);
+                menu();
+            },1000);
+            checkCollisionIndicator = false;
+            startGameIndicator = false;
+
+
+
+            // задать всему начальные значения (функцию)
+
+
+
+        }else if(startGameIndicator === false){
+            ctx.font = "30px Courier";
+            ctx.fillStyle = "Black";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("ПАУЗА", width / 2, height / 2);
+        };        
+    },100);   
 };
 
-menu();
+menu(); // запуск меню игры
+
+
+
