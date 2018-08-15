@@ -2,12 +2,12 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
-const width = 500;//canvas.width;
-const height =500;//canvas.height;
+
+const width = 500;//window.innerWidth / 2;
+const height = 500;//window.innerHeight / 2;
 let score = 0;
 let checkCollisionIndicator = false; // для того, чтобы при рекурсивном вызове setTimeout выйти.(столкнулся ли со стено?)
 let startGameIndicator = false; // для возможности делать паузу (запущена игра?)
-
 
 
 canvas.width = width;
@@ -68,9 +68,7 @@ let circle = (x,y,radius,fillCircle)=>{
     ctx.arc(x,y,radius,0,Math.PI*2);//рисование дуг
     if (fillCircle){
         ctx.fill();//заполнененная
-    }else{
-        ctx.stroke();//контур
-    }
+    };
 };
 
 //задаем ячейку
@@ -103,9 +101,9 @@ class Block{
 class Snake{
     constructor(){
         this.segments = [
-            new Block(3,1),
-            new Block(2,1),
-            new Block(1,1)
+            new Block(7,3),
+            new Block(6,3),
+            new Block(5,3)
         ];
         this.direction = "right";//текущее направление
         this.nextDirection = "right";//следующее направление
@@ -224,7 +222,7 @@ let direction = {
      38: "up",
      39: "right",
      40: "down"
- }
+ };
 
  $("body").keydown(function(event){
     let newDirection = direction[event.keyCode];
@@ -243,7 +241,7 @@ let direction = {
 
 
 let animationTime = 100;
-let levelOfComplexity = score * 2; //для увеличения скорости
+
 
 function startGameDraw (){
     let timeoutId = setTimeout(function gameLoop(){ // Функция будет жить в памяти, пока не сработал (или не был очищен) таймер
@@ -254,24 +252,17 @@ function startGameDraw (){
         apple.draw();
         drawBorder();
 
+         //для увеличения скорости
+        let levelOfComplexity = score * 2;
+
         if ((checkCollisionIndicator === false) && (startGameIndicator === true)){ //проверяем для того, чтобы рекурсия НЕ вызывалась вечно
         //потому что без нее после столкновения можно продолжить играть т к рекурсия не останавливается
-            setTimeout(gameLoop,animationTime-levelOfComplexity);
+            setTimeout(gameLoop, animationTime-levelOfComplexity);
         }else if (checkCollisionIndicator === true){
             gameOver(timeoutId);
             setTimeout(function(){
-                ctx.clearRect(0,0,width,height);
-                menu();
+                document.location.reload(true);
             },1000);
-            checkCollisionIndicator = false;
-            startGameIndicator = false;
-
-
-
-            // задать всему начальные значения (функцию)
-
-
-
         }else if(startGameIndicator === false){
             ctx.font = "30px Courier";
             ctx.fillStyle = "Black";
